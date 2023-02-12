@@ -2,9 +2,11 @@ package microservices.orders.controller
 
 import microservices.orders.model.Order
 import microservices.orders.service.OrderService
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+@RestController
 @RequestMapping("/orders")
 class OrderController(private val orderService: OrderService) {
 
