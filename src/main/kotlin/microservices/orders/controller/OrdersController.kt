@@ -2,13 +2,16 @@ package microservices.orders.controller
 
 import microservices.orders.model.Order
 import microservices.orders.service.OrderService
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.requestreply.AggregatingReplyingKafkaTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
 @RequestMapping("/orders")
-class OrderController(private val orderService: OrderService) {
+class OrderController(private val orderService: OrderService,
+    private val kafkaTemplate: KafkaTemplate<String, String>) {
 
     @PostMapping
     fun createOrder(@RequestBody order: Order): Order {
@@ -17,6 +20,7 @@ class OrderController(private val orderService: OrderService) {
 
     @GetMapping
     fun getAllOrders(): List<Order> {
+        kafkaTemplate.send("getAllOrders", "hello!")
         return orderService.getAllOrders()
     }
 
