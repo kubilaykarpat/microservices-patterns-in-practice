@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  postgres:
     image: postgres:14
     environment:
       POSTGRES_USER: postgres
@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - orders:/var/lib/postgresql/data
+      - orders-db:/var/lib/postgresql/data
 
   zookeeper:
     image: 'wurstmeister/zookeeper:latest'
@@ -50,4 +50,4 @@ services:
 #      - kafka
 
 volumes:
-  orders:
+  orders-db:
