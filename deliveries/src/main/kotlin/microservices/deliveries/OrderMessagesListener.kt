@@ -8,6 +8,6 @@ class OrderMessagesListener {
 
     @KafkaListener(topics = ["getAllOrders"])
     fun listener(data: String) {
-        println("consumed: $data")
+        println("Deliveries service consumed: $data")
     }
 }

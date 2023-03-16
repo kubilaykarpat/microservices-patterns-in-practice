@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class OrderService(
+class OrderServiceV2(
     private val orderRepository: OrderRepository,
     private val kafkaTemplate: KafkaTemplate<String, OrderCreatedEvent>
 ) {
