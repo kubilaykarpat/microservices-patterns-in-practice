@@ -3,20 +3,22 @@ package microservices.orders.service
 import microservices.orders.model.Order
 import microservices.orders.model.OrderCreatedEvent
 import microservices.orders.repository.OrderRepository
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
+
+const val ORDER_CREATED_EVENT_TYPE = "OrderCreated"
 
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val kafkaTemplate: KafkaTemplate<String, OrderCreatedEvent>
+    private val outboxService: OutboxService
 ) {
 
+    @Transactional
     fun createOrder(order: Order): Order {
         return orderRepository.save(order)
-            .also { kafkaTemplate.send("orders", order.toOrderCreatedEvent()) }
-            .also { println("Orders service produced: $it")}
+            .also { outboxService.addEventToOutbox(ORDER_CREATED_EVENT_TYPE, it.id.toString(), it.toOrderCreatedEvent()) }
     }
 
     fun getAllOrders(): List<Order> {
