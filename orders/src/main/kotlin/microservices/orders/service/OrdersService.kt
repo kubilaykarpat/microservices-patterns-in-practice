@@ -12,13 +12,18 @@ const val ORDER_CREATED_EVENT_TYPE = "OrderCreated"
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val outboxService: OutboxService
+    private val outboxMessageRelay: OutboxMessageRelay
 ) {
 
     @Transactional
     fun createOrder(order: Order): Order {
-        return orderRepository.save(order)
-            .also { outboxService.addEventToOutbox(ORDER_CREATED_EVENT_TYPE, it.id.toString(), it.toOrderCreatedEvent()) }
+        val createdOrder = orderRepository.save(order)
+        outboxMessageRelay.addEventToOutbox(
+            eventType = ORDER_CREATED_EVENT_TYPE,
+            aggregateId = createdOrder.id.toString(),
+            eventData = createdOrder.toOrderCreatedEvent()
+        )
+        return createdOrder
     }
 
     fun getAllOrders(): List<Order> {
