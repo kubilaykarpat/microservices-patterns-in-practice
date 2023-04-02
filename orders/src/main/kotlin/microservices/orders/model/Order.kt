@@ -10,5 +10,10 @@ data class Order(
     @Id
     val id: UUID? = null,
     val userId: UUID,
-    val items: List<String>
+    val items: List<String>,
+    val status: OrderStatus = OrderStatus.PENDING
 )
+
+enum class OrderStatus {
+    PENDING, APPROVED, DENIED
+}

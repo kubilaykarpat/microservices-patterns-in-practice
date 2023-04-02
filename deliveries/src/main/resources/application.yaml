@@ -1,6 +1,14 @@
 server:
   port: 8081
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/deliveries
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
   kafka:
     bootstrap-servers: localhost:9092
     consumer:

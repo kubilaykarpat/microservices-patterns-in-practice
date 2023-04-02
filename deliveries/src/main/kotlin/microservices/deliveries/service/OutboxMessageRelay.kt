@@ -1,14 +1,14 @@
-package microservices.orders.service
+package microservices.deliveries.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import microservices.orders.model.OutboxEvent
-import microservices.orders.repository.OutboxRepository
-import microservices.orders.repository.entity.OutboxEventEntity
+import microservices.deliveries.model.OutboxEvent
+import microservices.deliveries.repository.OutboxRepository
+import microservices.deliveries.repository.entity.OutboxEventEntity
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional
 
 
@@ -36,12 +36,15 @@ class OutboxMessageRelay(
         if (unprocessedEvents.isEmpty()) {
             return
         }
+
         logger.info("Outbox message relay is processing ${unprocessedEvents.size} events in outbox table")
+
 
         unprocessedEvents.forEach { event ->
             sendEvent(event)
         }
         logger.info("Outbox message processed events in outbox table")
+
     }
 
     private fun sendEvent(event: OutboxEventEntity) {
