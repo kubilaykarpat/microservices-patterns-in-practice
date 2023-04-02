@@ -49,7 +49,7 @@ class OutboxMessageRelay(
 
     private fun sendEvent(event: OutboxEventEntity) {
         try {
-            kafkaTemplate.send("orders", event.aggregateId ?: "", event.eventData)
+            kafkaTemplate.send(event.type, event.aggregateId ?: "", event.eventData)
                 .whenComplete { _, ex ->
                     if (ex != null) {
                         logger.warn("Can't send ${event.type} event for aggregate ${event.aggregateId}", ex)
