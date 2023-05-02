@@ -9,6 +9,6 @@ logging:
   level:
     root: ERROR
     microservices:
-      orders: INFO
+      deliveries: INFO
 
 

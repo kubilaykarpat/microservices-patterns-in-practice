@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
 
 
 var logger: Logger = LoggerFactory.getLogger(OutboxMessageRelay::class.java)
@@ -35,16 +37,17 @@ class OutboxMessageRelay(
     @Scheduled(fixedRate = 5000) // Polls every 5 seconds
     @Transactional
     fun processOutboxEvents() {
-        transactionTemplate.execute {
-            val unprocessedEvents = outboxRepository.findEventsToSend()
-            logger.info("Outbox message relay is processing ${unprocessedEvents.size} events in outbox table")
+        val unprocessedEvents = outboxRepository.findEventsToSend()
 
-
-            unprocessedEvents.forEach { event ->
-                sendEvent(event)
-            }
-            logger.info("Outbox message processed events in outbox table")
+        if(unprocessedEvents.isEmpty()){
+            return
         }
+        logger.info("Outbox message relay is processing ${unprocessedEvents.size} events in outbox table")
+
+        unprocessedEvents.forEach { event ->
+            sendEvent(event)
+        }
+        logger.info("Outbox message processed events in outbox table")
     }
 
     private fun sendEvent(event: OutboxEventEntity) {
@@ -57,7 +60,7 @@ class OutboxMessageRelay(
                         logger.info("Sent ${event.type} event for aggregate ${event.aggregateId}", ex)
                         markAsProcessed(event)
                     }
-                }
+                }!!
         } catch (ex: Exception) {
             logger.error("Error sending ${event.type} event for aggregate ${event.aggregateId}", ex)
         }
