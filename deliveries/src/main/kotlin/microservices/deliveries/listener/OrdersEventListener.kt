@@ -12,6 +12,6 @@ class OrdersEventListener {
 
     @KafkaListener(topics = ["OrderCreated"])
     fun listener(message: String) {
-        logger.info("Deliveries service received: $message")
+        logger.info("Deliveries service received OrderCreated event: $message")
     }
 }

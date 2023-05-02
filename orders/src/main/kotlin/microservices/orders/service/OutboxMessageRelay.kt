@@ -1,6 +1,5 @@
 package microservices.orders.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import microservices.orders.model.OutboxEvent
 import microservices.orders.repository.OutboxRepository
@@ -11,9 +10,6 @@ import org.springframework.stereotype.Service
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 
 
 var logger: Logger = LoggerFactory.getLogger(OutboxMessageRelay::class.java)
@@ -22,9 +18,7 @@ var logger: Logger = LoggerFactory.getLogger(OutboxMessageRelay::class.java)
 @Service
 class OutboxMessageRelay(
     private val outboxRepository: OutboxRepository,
-    private val kafkaTemplate: KafkaTemplate<String, String>,
-    private val transactionTemplate: TransactionTemplate,
-    private val objectMapper: ObjectMapper = jacksonObjectMapper()
+    private val kafkaTemplate: KafkaTemplate<String, String>
 ) {
 
     fun addEventToOutbox(eventType: String, aggregateId: String?, eventData: Any) {
@@ -39,7 +33,7 @@ class OutboxMessageRelay(
     fun processOutboxEvents() {
         val unprocessedEvents = outboxRepository.findEventsToSend()
 
-        if(unprocessedEvents.isEmpty()){
+        if (unprocessedEvents.isEmpty()) {
             return
         }
         logger.info("Outbox message relay is processing ${unprocessedEvents.size} events in outbox table")
@@ -60,7 +54,7 @@ class OutboxMessageRelay(
                         logger.info("Sent ${event.type} event for aggregate ${event.aggregateId}", ex)
                         markAsProcessed(event)
                     }
-                }!!
+                }
         } catch (ex: Exception) {
             logger.error("Error sending ${event.type} event for aggregate ${event.aggregateId}", ex)
         }
