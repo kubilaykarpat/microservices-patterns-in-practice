@@ -20,7 +20,7 @@ class OrderController(private val orderService: OrderService) {
     }
 
     @GetMapping("/{id}")
-    fun getOrderById(@PathVariable id: UUID): Order {
+    fun getOrderById(@PathVariable id: UUID): Order? {
         return orderService.getOrderById(id)
     }
 

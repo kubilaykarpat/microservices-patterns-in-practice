@@ -1,10 +1,15 @@
 package microservices.orders.service
 
+import microservices.orders.model.DeliveryCreatedEvent
+import microservices.orders.model.DeliveryCreationFailedEvent
 import microservices.orders.model.Order
 import microservices.orders.model.OrderCreatedEvent
+import microservices.orders.model.OrderStatus
 import microservices.orders.repository.OrderRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.IllegalArgumentException
 import java.util.*
 
 const val ORDER_CREATED_EVENT_TYPE = "OrderCreated"
@@ -17,6 +22,7 @@ class OrderService(
 
     @Transactional
     fun createOrder(order: Order): Order {
+        logger.info("Transaction 1: Create order in PENDING state")
         val createdOrder = orderRepository.save(order)
         outboxMessageRelay.addEventToOutbox(
             eventType = ORDER_CREATED_EVENT_TYPE,
@@ -30,8 +36,8 @@ class OrderService(
         return orderRepository.findAll().toList()
     }
 
-    fun getOrderById(id: UUID): Order {
-        return orderRepository.findById(id).get()
+    fun getOrderById(id: UUID): Order? {
+        return orderRepository.findByIdOrNull(id)
     }
 
     fun getOrdersByUserId(userId: UUID): List<Order> {
@@ -44,6 +50,22 @@ class OrderService(
 
     fun deleteOrder(id: UUID) {
         orderRepository.deleteById(id)
+    }
+
+    fun handleDeliveryCreated(deliveryCreatedEvent: DeliveryCreatedEvent){
+        logger.info("Transaction 3: Mark order as APPROVED")
+        var order = getOrderById(deliveryCreatedEvent.orderId)
+                ?: throw IllegalArgumentException("Cannot find order with ID ${deliveryCreatedEvent.orderId}")
+        order = order.copy(status = OrderStatus.APPROVED)
+        updateOrder(order)
+    }
+
+    fun handleDeliveryCreationFailed(deliveryCreationFailedEvent: DeliveryCreationFailedEvent){
+        logger.info("Compensating Transaction 1: Mark order as DENIED")
+        var order = getOrderById(deliveryCreationFailedEvent.orderId)
+                ?: throw IllegalArgumentException("Cannot find order with ID ${deliveryCreationFailedEvent.orderId}")
+        order = order.copy(status = OrderStatus.DENIED)
+        updateOrder(order)
     }
 }
 

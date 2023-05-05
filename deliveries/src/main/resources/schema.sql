@@ -1,8 +1,7 @@
-CREATE TABLE IF NOT EXISTS orders
+CREATE TABLE IF NOT EXISTS deliveries
 (
     id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid   NOT NULL,
-    items   text[] NOT NULL
+    orderId uuid NOT NULL
 );
 
 
@@ -16,5 +15,3 @@ CREATE TABLE IF NOT EXISTS outbox
     created_at   TIMESTAMP    NOT NULL DEFAULT now(),
     updated_at   TIMESTAMP    NOT NULL DEFAULT now()
 );
-
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS status VARCHAR(255);
